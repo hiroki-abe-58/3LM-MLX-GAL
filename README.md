@@ -15,6 +15,24 @@
 
 **外れました。** 増産の出番はありませんでした。
 
+## 同じ会話データで、前作と今作を並べる
+
+質問も乱数もサンプリング条件もそろえて、走らせた6問を選ばずに全部並べます。
+
+![前作と今作の会話比較](https://raw.githubusercontent.com/hiroki-abe-58/3LM-MLX/main/docs/images/3lm-gal-chat.png)
+
+前作は「猫は元気になることない」「うちはちょっとずつえんでたわ」と
+日本語自体が崩れます。今作は「猫、かわいいよね〜」と受けてから逸れます。
+**話が逸れる先が同じ**なのは、どちらも同じ 2,610会話を読んでいるからです。
+
+その3の時点ではこう見えていました（端末の画面）。
+
+![その3のギャル会話](https://raw.githubusercontent.com/hiroki-abe-58/2LM-MLX-GAL/main/docs/images/2lm-chat-gal-2.png)
+
+面白いのは、**大きくしても「お腹が空く」癖は消えなかった**ことです。
+キャラクターの中身は事前学習ではなく**会話データ側が決めている**、
+という当たり前のことが、並べると見えます。
+
 | 置き場 | 中身 |
 |---|---|
 | [GeneLab/3LM-MLX-GAL](https://huggingface.co/GeneLab/3LM-MLX-GAL) | 口調を学習させた重み |
@@ -50,8 +68,8 @@ python src/chat_cli.py --ckpt checkpoints/gal-final
 
 ```bash
 # 3LM-MLX の中で実行する。会話データはここから取る
-curl -sL -o data/raw/gal_line.jsonl \
-  https://raw.githubusercontent.com/hiroki-abe-58/3LM-MLX-GAL/main/data/gal_line.jsonl
+curl -sL -o data/raw/gal_chat.jsonl \
+  https://raw.githubusercontent.com/hiroki-abe-58/3LM-MLX-GAL/main/data/gal_chat.jsonl
 
 python data/prepare_sft.py --no-hf --out data/corpus_gal.txt --min-char-freq 1
 
@@ -124,7 +142,7 @@ step 30（7.9周）では 3.9201 → 3.9965 と悪化しました。
 
 ## 会話データについて
 
-`data/gal_line.jsonl` に 2,610会話（111,574文字 / 文字種 1,407）が入っています。
+`data/gal_chat.jsonl` に 2,610会話（111,574文字 / 文字種 1,407）が入っています。
 実在の人物とは関係のない**架空の会話**です。
 
 生成には Apache-2.0 のローカルモデル（calm3-22b-chat）だけを使っています。
@@ -150,7 +168,7 @@ step 30（7.9周）では 3.9201 → 3.9965 と悪化しました。
 
 | 場所 | 中身 |
 |---|---|
-| `data/gal_line.jsonl` | 会話 2,610件（111,574文字）|
+| `data/gal_chat.jsonl` | 会話 2,610件（111,574文字）|
 
 上の表の数字の出どころは 3LM-MLX 側にあります。
 同じファイルを2箇所に置くと、片方だけ直したときに気づけなくなるので、
