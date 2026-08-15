@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+
+# 重みは Hugging Face に置く (GitHub の1ファイル100MB制限を超えるため)
+checkpoints/
+*.safetensors
+
+# 検査前の生成物。ふるいに掛ける前のものを配らない
+data/raw.jsonl
+data/topics.txt
