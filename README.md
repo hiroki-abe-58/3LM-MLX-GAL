@@ -19,10 +19,11 @@
 |---|---|
 | [GeneLab/3LM-MLX-GAL](https://huggingface.co/GeneLab/3LM-MLX-GAL) | 口調を学習させた重み |
 | [GeneLab/3LM-MLX](https://huggingface.co/GeneLab/3LM-MLX) | 学習前（対話調整のみ） |
-| [3LM-MLX](https://github.com/hiroki-abe-58/3LM-MLX) | **学習・評価・データ生成のコード一式** |
+| [3LM-MLX](https://github.com/hiroki-abe-58/3LM-MLX) | **学習・評価のコード一式** |
+| [2LM-MLX-GAL](https://github.com/hiroki-abe-58/2LM-MLX-GAL) | 会話データを作ったスクリプト（その3） |
 
-**このリポジトリにコードは置いていません。** 学習も評価もデータ生成も
-3LM-MLX のものをそのまま使っており、複製すると片方だけ直したときに
+**このリポジトリにコードは置いていません。** 学習と評価は 3LM-MLX、
+データ生成はその3のものをそのまま使っています。複製すると片方だけ直したときに
 気づけなくなるためです。ここにあるのは**会話データと実測結果**です。
 
 ## すぐ試す
@@ -48,7 +49,10 @@ python src/chat_cli.py --ckpt checkpoints/gal-final
 ## 口調を乗せる
 
 ```bash
-# 3LM-MLX の中で実行する
+# 3LM-MLX の中で実行する。会話データはここから取る
+curl -sL -o data/raw/gal_line.jsonl \
+  https://raw.githubusercontent.com/hiroki-abe-58/3LM-MLX-GAL/main/data/gal_line.jsonl
+
 python data/prepare_sft.py --no-hf --out data/corpus_gal.txt --min-char-freq 1
 
 python src/sft.py --init-from checkpoints/sft-final --corpus data/corpus_gal.txt \
@@ -91,7 +95,7 @@ step 30（7.9周）では 3.9201 → 3.9965 と悪化しました。
 
 口調を得るために払った代償を、差で見ます。
 
-![口調を乗せる代償](docs/images/3lm-gal-cost.png)
+![口調を乗せる代償](https://raw.githubusercontent.com/hiroki-abe-58/3LM-MLX/main/docs/images/3lm-gal-cost.png)
 
 | 代償 | 2LM 13.81M | 3LM 35.66M |
 |---|---|---|
@@ -127,13 +131,14 @@ step 30（7.9周）では 3.9201 → 3.9965 と悪化しました。
 このモデルは本プロジェクトが学習に使っている `llm-jp/magpie-sft-v1.0` を
 作ったモデル本人でもあります。手元で完結するので、出力の扱いに制約が付きません。
 
-生成と検査のスクリプトは 3LM-MLX 側にあります。
+**このデータを作ったのはその3**（2LM-MLX-GAL）で、今回は1文字も足していません。
+生成と検査のスクリプトも、作った場所にそのまま置いてあります。
 
 | スクリプト | 役割 |
 |---|---|
-| [`data/gal/generate.py`](https://github.com/hiroki-abe-58/3LM-MLX/blob/main/data/gal/generate.py) | 話題の列挙 → 往復生成 → 検査してまとめる |
-| [`data/gal/validate.py`](https://github.com/hiroki-abe-58/3LM-MLX/blob/main/data/gal/validate.py) | 定型化・破綻・重複のふるい |
-| [`data/gal/README.md`](https://github.com/hiroki-abe-58/3LM-MLX/blob/main/data/gal/README.md) | 作り方の詳細 |
+| [`data/gal/generate.py`](https://github.com/hiroki-abe-58/2LM-MLX-GAL/blob/main/data/gal/generate.py) | 話題の列挙 → 往復生成 → 検査してまとめる |
+| [`data/gal/validate.py`](https://github.com/hiroki-abe-58/2LM-MLX-GAL/blob/main/data/gal/validate.py) | 定型化・破綻・重複のふるい |
+| [`data/gal/README.md`](https://github.com/hiroki-abe-58/2LM-MLX-GAL/blob/main/data/gal/README.md) | 作り方の詳細 |
 
 日本語の中身を人間が書かないのは意図的です。話題の語彙まで用意すると
 **そこが多様性の上限**になるので、ジャンルという骨組みだけ決めて、
@@ -141,13 +146,21 @@ step 30（7.9周）では 3.9201 → 3.9965 と悪化しました。
 
 ## このリポジトリの中身
 
+**会話データ 1本だけです。**
+
 | 場所 | 中身 |
 |---|---|
-| `data/gal_line.jsonl` | 会話 2,610件 |
-| `runs/eval_*.json` | 4指標の採点結果（2LM 素/ギャル、3LM 素/ギャル）|
-| `runs/gal_loss.csv` | 口調学習の損失ログ |
-| `runs/gal_loss_summary.json` | 学習設定と損失を数えたトークンの割合 |
-| `docs/images/` | 代償の比較図 |
+| `data/gal_line.jsonl` | 会話 2,610件（111,574文字）|
+
+上の表の数字の出どころは 3LM-MLX 側にあります。
+同じファイルを2箇所に置くと、片方だけ直したときに気づけなくなるので、
+**このリポジトリには複製を置きません。**
+
+| 実測の生データ | 場所 |
+|---|---|
+| [`runs/eval_3lm_gal.json`](https://github.com/hiroki-abe-58/3LM-MLX/blob/main/runs/eval_3lm_gal.json) ほか | 4指標の採点結果（2LM 素/ギャル、3LM 素/ギャル）|
+| [`runs/3lm/gal_loss.csv`](https://github.com/hiroki-abe-58/3LM-MLX/blob/main/runs/3lm/gal_loss.csv) | 口調学習の損失ログ |
+| [`tools/plot_gal_cost.py`](https://github.com/hiroki-abe-58/3LM-MLX/blob/main/tools/plot_gal_cost.py) | 上の図を作るコード |
 
 ## シリーズ
 
