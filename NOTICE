@@ -1,15 +1,17 @@
-3LM-MLX
+3LM-MLX-GAL
 Copyright (c) 2026 hiroki-abe-58
 
-このリポジトリのコード（src/, data/, eval/, tools/, scripts/, web/, server.py）は
-MIT License で提供しています。LICENSE を参照してください。
+このリポジトリはコードを持たず、会話データ（data/gal_chat.jsonl）と文書だけを
+置いています。これらは MIT License で提供しています。LICENSE を参照してください。
+学習・推論のコードは 3LM-MLX（https://github.com/hiroki-abe-58/3LM-MLX）にあります。
 
 
 ================================================================================
 学習済みモデルについて
 ================================================================================
 
-3LM は2段階で学習しています。
+3LM-MLX-GAL の重みは、3LM-MLX の重みを後述のギャル会話コーパスで
+追加学習したものです。土台の 3LM は2段階で学習しています。
 
   1. 事前学習: 大規模な日本語テキストで「次のトークン予測」を学ぶ
   2. SFT     : 対話データセットで「質問に答える形」に合わせる
@@ -60,12 +62,12 @@ CC BY の青空文庫を使っています。
   - アダルト誘導・エラーページと判定した文書を除外した
   - 青空文庫の割合を全体の約10%に抑えた
 
-以上の処理は data/prepare_pretrain.py に実装されています。
+以上の処理は 3LM-MLX の data/prepare_pretrain.py に実装されています。
 使用したシャード名とその SHA256、除外の内訳、各ソースの構成比は
-data/corpus_pretrain.manifest.json に記録してあります。
+3LM-MLX の data/corpus_pretrain.manifest.json に記録してあります。
 
 整形後のコーパス自体はリポジトリに含めていません（数GBあります）。
-revision を固定してあるので、data/prepare_pretrain.py を実行すると
+revision を固定してあるので、3LM-MLX の data/prepare_pretrain.py を実行すると
 同じものが再現できます。
 
 
@@ -118,8 +120,32 @@ Apache License, Version 2.0 の全文は licenses/Apache-2.0.txt に同梱して
   - 出現頻度の低い文字を含む会話を除外した
   - 改行を半角スペースに置換し、1行1会話のプレーンテキストに整形した
 
-以上の処理は data/prepare_sft.py に実装されています。
-どのデータセットを使ったかは data/prepare_sft.py --list-sources で確認できます。
+以上の処理は 3LM-MLX の data/prepare_sft.py に実装されています。
+どのデータセットを使ったかは 3LM-MLX の data/prepare_sft.py --list-sources で確認できます。
+
+
+================================================================================
+ギャル会話コーパス（data/gal_chat.jsonl）について
+================================================================================
+
+data/gal_chat.jsonl は、モデルにキャラクターを持たせるための架空の会話データです
+（2,610会話）。実在の人物・団体・会話とは一切関係ありません。
+2LM-MLX-GAL（https://github.com/hiroki-abe-58/2LM-MLX-GAL）の
+data/raw/gal_chat.jsonl と同一のファイルです。
+
+会話文そのものは人手で書いておらず、ローカルで動かした次のモデルに
+書かせています。生成物を学習データとして再配布するため、出力の利用条件を
+持たない Apache License 2.0 のモデルだけを使っています。
+
+  Qwen2.5-32B-Instruct
+    https://huggingface.co/Qwen/Qwen2.5-32B-Instruct
+    Copyright (c) Alibaba Cloud
+    Licensed under the Apache License, Version 2.0
+    MLX 版: https://huggingface.co/mlx-community/Qwen2.5-32B-Instruct-4bit
+
+生成と検査のスクリプトは 2LM-MLX-GAL の data/gal/generate.py と
+data/gal/validate.py にあります。上記モデルの出力を機械的に選別したものなので、
+Apache License 2.0 の出典表示を保持したうえで利用してください。
 
 
 ================================================================================
